@@ -24,6 +24,39 @@ if !exists('g:rg_window_location')
   let g:rg_window_location = 'botright'
 endif
 
+if !exists('g:rg_apply_mappings')
+    let g:rg_apply_mappings = 1
+endif
+
+fun! s:RgApplyKeyboardShortcuts()
+    " inspiration https://github.com/rking/ag.vim/blob/master/autoload/ag.vim
+
+    " edit and exit quickfix
+    nnoremap <silent> <buffer> <C-e> <CR><C-w><C-w>:cclose<CR>
+    " preview silently
+    nnoremap <silent> <buffer> <C-p> <CR>:copen<CR>
+    nnoremap <silent> <buffer> <C-o> <CR>:copen<CR>
+    " close search list
+    nnoremap <silent> <buffer> <C-q> :cclose<CR>
+
+    " new tab
+    nnoremap <silent> <buffer> <C-t> <C-w><CR><C-w>T
+    " new tab silently (stay focused in quickfix)
+    nnoremap <silent> <buffer> <C-s> <C-w><CR><C-w>TgT<C-W><C-W>
+
+    " horizontal split silently (stay focused in quickfix)
+    nnoremap <silent> <buffer> <C-h> <C-W><CR><C-w>K<C-w>b
+
+    nnoremap <silent> <buffer> <C-v> :let b:height=winheight(0)<CR><C-w><CR><C-w>H:copen<CR><C-w>J:exe printf(":normal %d\<lt>c-w>_", b:height)<CR>
+    " Interpretation:
+    " :let b:height=winheight(0)<CR>                      Get the height of the quickfix list window
+    " <CR><C-w>                                           Open the current item in a new split
+    " <C-w>H                                              Slam the newly opened window against the left edge
+    " :copen<CR> -or- :lopen<CR>                          Open either the quickfix window or the location list (whichever we were using)
+    " <C-w>J                                              Slam the quickfix list window against the bottom edge
+    " :exe printf(":normal %d\<lt>c-w>_", b:height)<CR>   Restore the quickfix list window's height from before we opened the match
+endfun
+
 fun! g:RgVisual() range
   call s:RgGrepContext(function('s:RgSearch'), '"' . s:RgGetVisualSelection() . '"')
 endfun
@@ -67,6 +100,9 @@ fun! s:RgSearch(txt)
     redraw!
     if exists('g:rg_highlight')
       call s:RgHighlight(a:txt)
+    endif
+    if g:rg_apply_mappings
+        call s:RgApplyKeyboardShortcuts()
     endif
   else
     cclose
