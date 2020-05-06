@@ -87,7 +87,7 @@ fun! s:RgSearchTerm(txt)
 endfun
 
 fun! s:RgSearch(txt)
-  let l:rgopts = ' '
+  let l:rgopts = '--max-columns=1000 '
   if &ignorecase == 1
     let l:rgopts = l:rgopts . '-i '
   endif
